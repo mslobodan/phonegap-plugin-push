@@ -8,13 +8,16 @@
 
 #import "AppDelegate.h"
 @import UserNotifications;
+@import Firebase;
 
 extern NSString *const pushPluginApplicationDidBecomeActiveNotification;
 
-@interface AppDelegate (notification) <UNUserNotificationCenterDelegate>
+@interface AppDelegate (notification) <FIRMessagingDelegate, UNUserNotificationCenterDelegate>
+
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken;
 - (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error;
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:( void (^)(UIBackgroundFetchResult))completionHandler;
+- (void)messaging:(FIRMessaging *)messaging didReceiveRegistrationToken:(NSString *)fcmToken;
 - (void)pushPluginOnApplicationDidBecomeActive:(UIApplication *)application;
 - (void)checkUserHasRemoteNotificationsEnabledWithCompletionHandler:(nonnull void (^)(BOOL))completionHandler;
 - (id) getCommandInstance:(NSString*)className;

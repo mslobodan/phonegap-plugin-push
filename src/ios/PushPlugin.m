@@ -28,9 +28,7 @@
 
 #import "PushPlugin.h"
 #import "AppDelegate+notification.h"
-@import FirebaseInstanceID;
-@import FirebaseMessaging;
-@import FirebaseAnalytics;
+@import Firebase;
 
 @implementation PushPlugin : CDVPlugin
 
@@ -51,10 +49,19 @@
 @synthesize fcmRegistrationToken;
 @synthesize fcmTopics;
 
--(void)initRegistration;
-{
-    NSString * registrationToken = [[FIRInstanceID instanceID] token];
+-(void)initRegistration {
+    [[FIRInstanceID instanceID] instanceIDWithHandler:^(FIRInstanceIDResult * _Nullable result,
+                                                        NSError * _Nullable error) {
+        if (error != nil) {
+            NSLog(@"FCM Error fetching remote instance ID: %@", error);
+        } else {
+            NSString * registrationToken = result.token;
+            [self processNewRegistrationToken:registrationToken];
+        }
+    }];
+}
 
+-(void)processNewRegistrationToken:(NSString*) registrationToken {
     if (registrationToken != nil) {
         NSLog(@"FCM Registration Token: %@", registrationToken);
         [self setFcmRegistrationToken: registrationToken];
@@ -72,7 +79,6 @@
     } else {
         NSLog(@"FCM token is null");
     }
-
 }
 
 //  FCM refresh token
@@ -81,7 +87,6 @@
 #if !TARGET_IPHONE_SIMULATOR
     // A rotation of the registration tokens is happening, so the app needs to request a new token.
     NSLog(@"The FCM registration token needs to be changed.");
-    [[FIRInstanceID instanceID] token];
     [self initRegistration];
 #endif
 }
@@ -157,8 +162,7 @@
     }
 }
 
-- (void)init:(CDVInvokedUrlCommand*)command;
-{
+- (void)init:(CDVInvokedUrlCommand*)command {
     NSMutableDictionary* options = [command.arguments objectAtIndex:0];
     NSMutableDictionary* iosOptions = [options objectForKey:@"ios"];
     id voipArg = [iosOptions objectForKey:@"voip"];
@@ -169,7 +173,7 @@
             self.callbackId = command.callbackId;
 
             PKPushRegistry *pushRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
-            pushRegistry.delegate = self;
+            pushRegistry.delegate = (id <PKPushRegistryDelegate>)self;
             pushRegistry.desiredPushTypes = [NSSet setWithObject:PKPushTypeVoIP];
         }];
     } else {
@@ -308,8 +312,9 @@
                 NSLog(@"Using FCM Notification");
                 [self setUsesFCM: YES];
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    if([FIRApp defaultApp] == nil)
+                    if([FIRApp defaultApp] == nil) {
                         [FIRApp configure];
+                    }
                     [self initRegistration];
                 });
             } else {
@@ -382,14 +387,17 @@
 #endif
 }
 
-- (void)didFailToRegisterForRemoteNotificationsWithError:(NSError *)error
-{
+- (void)didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
     if (self.callbackId == nil) {
         NSLog(@"Unexpected call to didFailToRegisterForRemoteNotificationsWithError, ignoring: %@", error);
         return;
     }
     NSLog(@"Push Plugin register failed");
     [self failWithMessage:self.callbackId withMsg:@"" withError:error];
+}
+
+- (void)receivedNewRegistrationToken:(NSString *)registrationToken {
+    [self processNewRegistrationToken:registrationToken];
 }
 
 - (void)notificationReceived {
@@ -466,8 +474,7 @@
     }
 }
 
-- (void)clearNotification:(CDVInvokedUrlCommand *)command
-{
+- (void)clearNotification:(CDVInvokedUrlCommand *)command {
     NSNumber *notId = [command.arguments objectAtIndex:0];
     [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:^(NSArray<UNNotification *> * _Nonnull notifications) {
         /*
@@ -539,7 +546,7 @@
     }
 }
 
--(void)registerWithToken:(NSString*)token; {
+-(void)registerWithToken:(NSString*)token {
     // Send result to trigger 'registration' event but keep callback
     NSMutableDictionary* message = [NSMutableDictionary dictionaryWithCapacity:2];
     [message setObject:token forKey:@"registrationId"];
@@ -554,16 +561,14 @@
 }
 
 
--(void)failWithMessage:(NSString *)myCallbackId withMsg:(NSString *)message withError:(NSError *)error
-{
+-(void)failWithMessage:(NSString *)myCallbackId withMsg:(NSString *)message withError:(NSError *)error {
     NSString        *errorMessage = (error) ? [NSString stringWithFormat:@"%@ - %@", message, [error localizedDescription]] : message;
     CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:errorMessage];
 
     [self.commandDelegate sendPluginResult:commandResult callbackId:myCallbackId];
 }
 
--(void) finish:(CDVInvokedUrlCommand*)command
-{
+-(void) finish:(CDVInvokedUrlCommand*)command {
     NSLog(@"Push Plugin finish called");
 
     [self.commandDelegate runInBackground:^ {
@@ -600,8 +605,7 @@
 }
 
 
-- (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type
-{
+- (void)pushRegistry:(PKPushRegistry *)registry didUpdatePushCredentials:(PKPushCredentials *)credentials forType:(NSString *)type {
     if([credentials.token length] == 0) {
         NSLog(@"VoIPPush Plugin register error - No device token:");
         return;
@@ -617,20 +621,17 @@
     [self registerWithToken:sToken];
 }
 
-- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type
-{
+- (void)pushRegistry:(PKPushRegistry *)registry didReceiveIncomingPushWithPayload:(PKPushPayload *)payload forType:(NSString *)type {
     NSLog(@"VoIP Notification received");
     self.notificationMessage = payload.dictionaryPayload;
     [self notificationReceived];
 }
 
-- (void)handleNotificationSettings:(NSNotification *)notification
-{
+- (void)handleNotificationSettings:(NSNotification *)notification {
     [self handleNotificationSettingsWithAuthorizationOptions:nil];
 }
 
-- (void)handleNotificationSettingsWithAuthorizationOptions:(NSNumber *)authorizationOptionsObject
-{
+- (void)handleNotificationSettingsWithAuthorizationOptions:(NSNumber *)authorizationOptionsObject {
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     UNAuthorizationOptions authorizationOptions = [authorizationOptionsObject unsignedIntegerValue];
 
@@ -663,8 +664,7 @@
     }];
 }
 
-- (void)registerForRemoteNotifications
-{
+- (void)registerForRemoteNotifications {
     [[UIApplication sharedApplication] registerForRemoteNotifications];
 }
 

@@ -55,6 +55,32 @@ NSString *const pushPluginApplicationDidBecomeActiveNotification = @"pushPluginA
 
 - (AppDelegate *)pushPluginSwizzledInit
 {
+    NSLog(@"---Swizled init");
+    [FIRMessaging messaging].delegate = self;
+    if ([UNUserNotificationCenter class] != nil) {
+        // iOS 10 or later
+        // For iOS 10 display notification (sent via APNS)
+        [UNUserNotificationCenter currentNotificationCenter].delegate = (id <UNUserNotificationCenterDelegate>)self;
+        UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert |
+        UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
+        [[UNUserNotificationCenter currentNotificationCenter]
+         requestAuthorizationWithOptions:authOptions
+         completionHandler:^(BOOL granted, NSError * _Nullable error) {
+             // ...
+             NSLog(@"granted: %d", (int)granted);
+             NSLog(@"Notification center error: %@", error);
+         }];
+    } else {
+        // iOS 10 notifications aren't available; fall back to iOS 8-9 notifications.
+        UIUserNotificationType allNotificationTypes =
+        (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
+        UIUserNotificationSettings *settings =
+        [UIUserNotificationSettings settingsForTypes:allNotificationTypes categories:nil];
+        [[UIApplication sharedApplication] registerUserNotificationSettings:settings];
+    }
+
+    [[UIApplication sharedApplication] registerForRemoteNotifications];
+
     UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
     center.delegate = self;
 
@@ -132,6 +158,12 @@ NSString *const pushPluginApplicationDidBecomeActiveNotification = @"pushPluginA
     } else {
         completionHandler(UIBackgroundFetchResultNoData);
     }
+}
+
+-(void)messaging:(FIRMessaging *)messaging didReceiveRegistrationToken:(NSString *)registrationToken{
+    NSLog(@"Received new FCM token: %@", registrationToken);
+    PushPlugin *pushHandler = [self getCommandInstance:@"PushNotification"];
+    [pushHandler receivedNewRegistrationToken:registrationToken];
 }
 
 - (void)checkUserHasRemoteNotificationsEnabledWithCompletionHandler:(nonnull void (^)(BOOL))completionHandler

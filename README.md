@@ -2,6 +2,22 @@
 
 > Register and receive push notifications
 
+# About this fork
+
+This fork has updated firebase to more recent versions on iOS and Android platform.
+
+On iOS it uses pods:
+```
+Firebase/Core: 6.2
+Firebase/Messaging: 6.2
+```
+
+On Android platform it uses dependencies: 
+```
+com.google.firebase:firebase-core:16.0.7
+com.google.firebase:firebase-messaging:18.0.0
+``` 
+
 # Warning
 
 The links below take you to the version 2.x documentation which includes a

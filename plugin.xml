@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:amazon="http://schemas.android.com/apk/lib/com.amazon.device.ads" xmlns:rim="http://www.blackberry.com/ns/widgets" id="phonegap-plugin-push" version="2.2.3">
+<plugin
+  xmlns="http://www.phonegap.com/ns/plugins/1.0"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:amazon="http://schemas.android.com/apk/lib/com.amazon.device.ads"
+  xmlns:rim="http://www.blackberry.com/ns/widgets"
+  id="phonegap-plugin-push"
+  version="2.2.3-1.0.0"
+>
   <name>PushPlugin</name>
-  <description>    This plugin allows your application to receive push notifications on Android, iOS and Windows devices.    Android uses Firebase Cloud Messaging.    iOS uses Apple APNS Notifications.    Windows uses Microsoft WNS Notifications.  </description>
+  <description>This plugin allows your application to receive push notifications on Android, iOS and Windows devices.    Android uses Firebase Cloud Messaging.    iOS uses Apple APNS Notifications.    Windows uses Microsoft WNS Notifications.  </description>
   <license>MIT</license>
   <js-module src="www/push.js" name="PushNotification">
     <clobbers target="PushNotification"/>
@@ -27,28 +34,24 @@
       <activity android:name="com.adobe.phonegap.push.PushHandlerActivity" android:exported="true" android:permission="${applicationId}.permission.PushHandlerActivity"/>
       <receiver android:name="com.adobe.phonegap.push.BackgroundActionButtonHandler"/>
       <receiver android:name="com.adobe.phonegap.push.PushDismissedHandler"/>
-      <service android:name="com.adobe.phonegap.push.FCMService">
+      <service android:name="com.adobe.phonegap.push.FCMService" android:stopWithTask="false">
         <intent-filter>
           <action android:name="com.google.firebase.MESSAGING_EVENT"/>
         </intent-filter>
       </service>
-      <service android:name="com.adobe.phonegap.push.PushInstanceIDListenerService">
-        <intent-filter>
-          <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-        </intent-filter>
-      </service>
     </config-file>
-    <preference name="ANDROID_SUPPORT_V13_VERSION" default="27.+"/>
-    <preference name="FCM_VERSION" default="17.0.+"/>
+    <preference name="ANDROID_SUPPORT_V13_VERSION" default="27.0.2"/>
+    <preference name="FIREBASE_CORE_VERSION" default="16.0.7"/>
+    <preference name="FCM_VERSION" default="18.0.0"/>
     <framework src="com.android.support:support-v13:$ANDROID_SUPPORT_V13_VERSION"/>
     <framework src="me.leolin:ShortcutBadger:1.1.17@aar"/>
+    <framework src="com.google.firebase:firebase-core:$FIREBASE_CORE_VERSION"/>
     <framework src="com.google.firebase:firebase-messaging:$FCM_VERSION"/>
-    <dependency id="cordova-support-google-services" version="~1.2.0"/>
+    <dependency id="cordova-support-google-services" version="1.3.1"/>
     <dependency id="phonegap-plugin-multidex" version="~1.0.0"/>
     <source-file src="src/android/com/adobe/phonegap/push/FCMService.java" target-dir="src/com/adobe/phonegap/push/"/>
     <source-file src="src/android/com/adobe/phonegap/push/PushConstants.java" target-dir="src/com/adobe/phonegap/push/"/>
     <source-file src="src/android/com/adobe/phonegap/push/PushHandlerActivity.java" target-dir="src/com/adobe/phonegap/push/"/>
-    <source-file src="src/android/com/adobe/phonegap/push/PushInstanceIDListenerService.java" target-dir="src/com/adobe/phonegap/push/"/>
     <source-file src="src/android/com/adobe/phonegap/push/PushPlugin.java" target-dir="src/com/adobe/phonegap/push/"/>
     <source-file src="src/android/com/adobe/phonegap/push/BackgroundActionButtonHandler.java" target-dir="src/com/adobe/phonegap/push/"/>
     <source-file src="src/android/com/adobe/phonegap/push/PushDismissedHandler.java" target-dir="src/com/adobe/phonegap/push/"/>
@@ -78,11 +81,12 @@
     <config-file target="*-Release.plist" parent="aps-environment">
       <string>production</string>
     </config-file>
-    <source-file src="src/ios/AppDelegate+notification.m"/>
-    <source-file src="src/ios/PushPlugin.m"/>
     <header-file src="src/ios/AppDelegate+notification.h"/>
+    <source-file src="src/ios/AppDelegate+notification.m"/>
     <header-file src="src/ios/PushPlugin.h"/>
-    <framework src="FirebaseMessaging" type="podspec" spec="~> 2.0.0"/>
+    <source-file src="src/ios/PushPlugin.m"/>
+    <framework src="Firebase/Core" type="podspec" spec="6.2"/>
+    <framework src="Firebase/Messaging" type="podspec" spec="6.2"/>
     <framework src="PushKit.framework"/>
   </platform>
   <platform name="windows">

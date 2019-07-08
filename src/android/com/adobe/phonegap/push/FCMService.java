@@ -30,6 +30,7 @@ import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -66,6 +67,14 @@ public class FCMService extends FirebaseMessagingService implements PushConstant
     } else {
       messageList.add(message);
     }
+  }
+
+  @Override
+  public void onNewToken(String newToken) {
+    super.onNewToken(newToken);
+    Log.d(LOG_TAG, "Refreshed token: " + newToken);
+    // TODO: Implement this method to send any registration to your app's servers.
+    //sendRegistrationToServer(refreshedToken);
   }
 
   @Override
