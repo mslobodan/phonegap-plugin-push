@@ -1,10 +1,12 @@
-# phonegap-plugin-push [![Build Status](https://travis-ci.org/phonegap/phonegap-plugin-push.svg)](https://travis-ci.org/phonegap/phonegap-plugin-push)
+# phonegap-plugin-push
 
 > Register and receive push notifications
 
 # About this fork
 
-This fork has updated firebase to more recent versions on iOS and Android platform.
+[![npm version](https://badge.fury.io/js/mslobodan_phonegap-plugin-push.svg)](https://www.npmjs.com/package/mslobodan_phonegap-plugin-push)
+
+This fork has updated firebase versions on iOS and Android platform to matches versions with [mslobodan_cordova-plugin-firebase-dynamiclinks](https://www.npmjs.com/package/mslobodan_cordova-plugin-firebase-dynamiclinks).
 
 On iOS it uses pods:
 ```
@@ -12,11 +14,11 @@ Firebase/Core: 6.2
 Firebase/Messaging: 6.2
 ```
 
-On Android platform it uses dependencies: 
+On Android platform it uses dependencies:
 ```
 com.google.firebase:firebase-core:16.0.7
 com.google.firebase:firebase-messaging:18.0.0
-``` 
+```
 
 # Warning
 

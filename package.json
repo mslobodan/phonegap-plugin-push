@@ -1,8 +1,8 @@
 {
-  "name": "@mslobodan/phonegap-plugin-push",
+  "name": "mslobodan_phonegap-plugin-push",
   "description": "Register and receive push notifications.",
   "types": "./types/index.d.ts",
-  "version": "2.2.3-1.0.1",
+  "version": "2.2.3-2.0.0",
   "homepage": "http://github.com/mslobodan/phonegap-plugin-push#readme",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
     "url": "https://github.com/mslobodan/phonegap-plugin-push/issues"
   },
   "cordova": {
-    "id": "phonegap-plugin-push",
+    "id": "mslobodan_phonegap-plugin-push",
     "platforms": [
       "ios",
       "android",
@@ -64,7 +64,7 @@
       }
     }
   },
-  "author": "Adobe PhoneGap Team",
+  "author": "Slobodan Milicevic (slobodan.milicevic1989@gmail.com)",
   "license": "MIT",
   "scripts": {
     "build": "babel src/js --out-dir www",
