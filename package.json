@@ -2,7 +2,7 @@
   "name": "mslobodan_phonegap-plugin-push",
   "description": "Register and receive push notifications.",
   "types": "./types/index.d.ts",
-  "version": "2.2.3-2.0.0",
+  "version": "2.2.3-2.1.0",
   "homepage": "http://github.com/mslobodan/phonegap-plugin-push#readme",
   "repository": {
     "type": "git",
